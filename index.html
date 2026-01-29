@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Celebration</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            color: white;
+            scroll-behavior: smooth;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.5);
+        }
+        h2 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.5);
+        }
+        .lyrics-box {
+            font-family: 'Dancing Script', cursive;
+            min-height: 120px;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+            max-width: 800px;
+            color: #ff69b4;
+            transition: opacity 0.5s ease;
+        }
+
+        #bg-video-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background-color: black;
+        }
+
+        #main-bg-video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: brightness(40%);
+            transition: opacity 1s ease-in-out;
+        }
+
+        .page-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #wish-page { display: none; opacity: 0; transition: opacity 1s ease; }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: #ff4081;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+            transition: 0.3s;
+            margin: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover:not(:disabled) { transform: scale(1.1); background: #f50057; }
+        
+        /* Disabled Button Style */
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        #timer-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* FIXED HEART BUTTON STYLES */
+        .heart-container {
+            margin-top: 30px;
+            cursor: pointer;
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        .heart-container:hover { transform: scale(1.2); }
+        
+        .heart-shape {
+            position: relative;
+            width: 50px;
+            height: 80px;
+            background: #FF0000;
+            border-radius: 50px 50px 0 0;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            transform: rotate(-45deg);
+            left:-10px;
+            top: -10px;
+        }
+
+        .heart-shape::after {
+            content: "";
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            background: #FF0000;
+            border-radius: 50px 50px 0 0;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            transform: rotate(90deg);
+            transform-origin: 50% 70%; 
+            left: 0;
+            top: 0;
+        }
+        
+        .heart-text {
+            position: absolute;
+            z-index: 20;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: white;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* NOTE MODAL STYLES */
+        #note-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .note-card {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* GALLERY STYLES */
+        #gallery-section { display: none; width: 100%; max-width: 1100px; margin-top: 50px; padding-bottom: 100px; }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .gallery-item {
+            height: 350px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+            opacity: 0;
+            transform: scale(0.7);
+        }
+        .gallery-item img, .gallery-item video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .pop-in { animation: popInAnim 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
+        
+        @keyframes popInAnim {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-video-container">
+        <video id="main-bg-video" autoplay muted loop playsinline>
+            <source id="video-source" src="landing_bg.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="landing-page" class="page-content">
+        <h1>A Gift is waiting for you... 🎁</h1>
+        
+        <div id="timer-display">Loading timer...</div>
+
+        <button id="open-btn" class="btn" onclick="goToWishPage()" disabled>Locked 🔒</button>
+        
+        <div class="heart-container" onclick="toggleNote()">
+            <div class="heart-shape"></div>
+            <div class="heart-text">Note</div>
+        </div>
+    </div>
+
+    <div id="note-overlay" onclick="toggleNote()">
+        <div class="note-card" onclick="event.stopPropagation()">
+            <h2 style="font-family: 'Dancing Script'; color: #ff4081; font-size: 2rem; margin-bottom: 15px;">A Message for You</h2>
+            <p style="line-height: 1.6;">Every moment with you is like a beautiful song. I hope this small surprise brings a smile to your face today. You deserve all the happiness in the world!<br><br>
+            "I Thought not to fall in love, But as we meet I couldn't stop..."<br>
+            "I have so many things to share with you, But can't..."<br>
+            Only thing I could say, I'll never forget you...</p>
+            <p style="font-weight: bold; color: #ff4081;">red_wolf.69</p>
+            <button class="btn" style="padding: 10px 20px;" onclick="toggleNote()">Close</button>
+        </div>
+    </div>
+
+    <div id="wish-page" class="page-content">
+        <h1>Happy Birthday to Special One! 🎂</h1>
+        <h2>Cheers to 20🥂...Stay Blessed...💕</h2>
+        <div id="lyric-display" class="lyrics-box"></div>
+        
+        <audio id="bg-music" loop>
+            <source src="song.mp3" type="audio/mpeg">
+        </audio>
+
+        <button id="reveal-btn" class="btn" onclick="showGallery()">CLICK FOR YOU</button>
+        
+        <div id="gallery-section">
+            <h2 style="font-family: 'Dancing Script'; font-size: 2.5rem; margin-bottom: 30px;">Our Memories</h2>
+            <div class="gallery-grid" id="gallery-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Set the birthday date here: Year, Month (0-11), Day, Hour, Minute
+        // Note: Month is 0-indexed (Jan=0, Feb=1, etc.)
+        const birthdayDate = new Date(2026, 1, 3, 0, 0, 0).getTime(); 
+
+        const videos = {
+            landing: "landing_bg.mp4",
+            wish: "birthday_bg.mp4",
+            gallery: "gallery_bg.mp4"
+        };
+
+        const lyrics = [
+            "Sambhaal ke rakha wo phool mera tu",
+            "Meri shayari mein zaroor raha tu",
+            "Jo aankhon mein pyaari si duniya basaayi",
+            "Wo duniya bhi tha tu, wo lamha bhi tha tu",
+            "Haan, lagte hain mujhko ye kisse sataane",
+            "Deta na dil mera tujhko bhulaane",
+            "Adhoore se vaade, adhoori si raatein",
+            "Ab hisse mein daakhil mere bas wo yaadein"
+        ];
+
+        const galleryFiles = ['image1.jpg', 'image3.png', 'image2.jpg', 'image4.png'];
+        const videoPlayer = document.getElementById('main-bg-video');
+
+        // --- TIMER LOGIC ---
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = birthdayDate - now;
+            const timerEl = document.getElementById('timer-display');
+            const btnEl = document.getElementById('open-btn');
+
+            if (distance < 0) {
+                timerEl.innerHTML = "The Wait is Over! ✨";
+                btnEl.disabled = false;
+                btnEl.innerHTML = "Open Gift 🎁";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerEl.innerHTML = `Unlocks in: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // --- NAVIGATION & ANIMATION ---
+        function changeBackground(videoSrc) {
+            videoPlayer.style.opacity = "0"; 
+            setTimeout(() => {
+                videoPlayer.src = videoSrc;
+                videoPlayer.load();
+                videoPlayer.play();
+                videoPlayer.style.opacity = "1";
+            }, 800);
+        }
+
+        function toggleNote() {
+            const overlay = document.getElementById('note-overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function goToWishPage() {
+            changeBackground(videos.wish);
+            document.getElementById('bg-music').play();
+            document.getElementById('landing-page').style.display = 'none';
+            const wishPage = document.getElementById('wish-page');
+            wishPage.style.display = 'flex';
+            setTimeout(() => wishPage.style.opacity = "1", 50);
+            startLyrics();
+        }
+
+        function startLyrics() {
+            let i = 0;
+            const display = document.getElementById('lyric-display');
+            display.innerText = lyrics[0];
+            setInterval(() => {
+                i = (i + 1) % lyrics.length;
+                display.style.opacity = 0;
+                setTimeout(() => {
+                    display.innerText = lyrics[i];
+                    display.style.opacity = 1;
+                }, 500);
+            }, 4500);
+        }
+
+        function showGallery() {
+            changeBackground(videos.gallery);
+            document.getElementById('reveal-btn').style.display = 'none';
+            const section = document.getElementById('gallery-section');
+            section.style.display = 'block';
+            const grid = document.getElementById('gallery-grid');
+            
+            galleryFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                setTimeout(() => {
+                    item.classList.add('pop-in');
+                }, index * 250); 
+
+                const isVideo = file.toLowerCase().endsWith('.mp4');
+                item.innerHTML = isVideo ? 
+                    `<video src="${file}" autoplay muted loop playsinline></video>` : 
+                    `<img src="${file}">`;
+                grid.appendChild(item);
+            });
+
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
